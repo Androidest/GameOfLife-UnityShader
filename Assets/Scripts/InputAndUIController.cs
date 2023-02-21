@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 
-public class MainPanel : MonoBehaviour
+public class InputAndUIController : MonoBehaviour
 {
     [SerializeField] GameofLifeController GameofLifeController;
     private Camera MainCamera;
@@ -15,6 +15,9 @@ public class MainPanel : MonoBehaviour
     private Button PauseBtn;
     private GroupBox PlayPauseGroup;
     private Slider GenSpeedSlider;
+    private bool IsLeftDown;
+    private int LastX;
+    private int LastY;
 
     void Awake()
     {
@@ -37,6 +40,8 @@ public class MainPanel : MonoBehaviour
     {
         onClickPause();
         GenSpeedSlider.value = 0.5f;
+        LastX = -1;
+        LastY = -1;
     }
 
     private void onClickPause()
@@ -68,22 +73,31 @@ public class MainPanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Check for a left mouse button click
-        if (Input.GetMouseButtonDown(0) && 
-            !EventSystem.current.IsPointerOverGameObject())
+        if (IsLeftDown)
         {
-            // Cast a ray from the mouse position
-            Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hitInfo;
-
-            // Check if the ray intersects with the quad collider
-            if (Physics.Raycast(ray, out hitInfo))
+            if (Input.GetMouseButtonUp(0))
             {
-                // Use the world hit point for your game logic
-                //Debug.Log("World hit point: " + hitInfo.point);
-
-                GameofLifeController.DrawPixel((int)hitInfo.point.x, (int)hitInfo.point.y);
+                IsLeftDown = false;
+                GameofLifeController.ClearDrawingState();
             }
+            else
+            {
+                // Cast a ray from the mouse position
+                Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hitInfo;
+
+                // Check if the ray intersects with the quad collider
+                if (Physics.Raycast(ray, out hitInfo) && (LastX != (int)hitInfo.point.x || LastY != (int)hitInfo.point.y))
+                {
+                    LastX = (int)hitInfo.point.x;
+                    LastY = (int)hitInfo.point.y;
+                    GameofLifeController.DrawPixel(LastX, LastY);
+                }
+            }
+        }
+        else if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            IsLeftDown = true;
         }
     }
 }

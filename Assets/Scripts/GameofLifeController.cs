@@ -13,10 +13,19 @@ public class GameofLifeController : MonoBehaviour
     private Color[] Pixels;
     private Texture2D InputTexture;
     private float DeltaTime;
+    private DrawState CurDrawState;
+
+    enum DrawState
+    {
+        NONE = -1,
+        DELETE = 0,
+        CREATE = 1
+    }
 
     void Awake()
     {
         IsPause = true;
+        CurDrawState = DrawState.NONE;
         InputTexture = new Texture2D(CurGenerationRT.width, CurGenerationRT.height, TextureFormat.R8, false);
         Pixels = new Color[CurGenerationRT.width * CurGenerationRT.height];
         for (int i = 0; i < Pixels.Length; ++i)
@@ -47,9 +56,14 @@ public class GameofLifeController : MonoBehaviour
 
     public void DrawPixel(int x, int y)
     {
-        var hasCell = GetPixel(x, y);
-        SetPixel(x, y, !hasCell);
-        InputTexture.SetPixel(x, y, hasCell ? new Color(0, 0, 0, 0) : new Color(1, 0, 0, 0));
+        if (CurDrawState == DrawState.NONE)
+        {
+            var hasCell = GetPixel(x, y);
+            CurDrawState = hasCell ? DrawState.DELETE : DrawState.CREATE;
+        }
+
+        SetPixel(x, y, CurDrawState == DrawState.CREATE);
+        InputTexture.SetPixel(x, y, new Color((int)CurDrawState, 0, 0, 0));
         InputTexture.Apply();
         Graphics.Blit(InputTexture, CurGenerationRT);
     }
@@ -81,6 +95,11 @@ public class GameofLifeController : MonoBehaviour
         InputTexture.Apply();
         Pixels = InputTexture.GetPixels();
         RenderTexture.active = null;
+    }
+
+    public void ClearDrawingState()
+    {
+        CurDrawState = DrawState.NONE;
     }
 
     private void UpdatePixelsToRenderTexture()
