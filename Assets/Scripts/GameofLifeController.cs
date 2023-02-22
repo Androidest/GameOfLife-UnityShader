@@ -7,8 +7,8 @@ public class GameofLifeController : MonoBehaviour
     [SerializeField] Material GOLComputingMat;
     [SerializeField] RenderTexture CurGenerationRT;
     [SerializeField] RenderTexture NextGenerationRT;
-    [SerializeField] float FrameRate = 10000f;
-
+    
+    float FrameDeltaTime = 0;
     public bool IsPause;
     private Color[] Pixels;
     private Texture2D InputTexture;
@@ -41,7 +41,7 @@ public class GameofLifeController : MonoBehaviour
         {
             var easeVal = Mathf.Exp(-4 * value);
             const float maxFrameTime = 1.5f;
-            FrameRate = Mathf.Clamp(maxFrameTime * easeVal, 0, maxFrameTime);
+            FrameDeltaTime = Mathf.Clamp(maxFrameTime * easeVal, 0, maxFrameTime);
         }
     }
 
@@ -116,9 +116,9 @@ public class GameofLifeController : MonoBehaviour
             return;
 
         DeltaTime += Time.deltaTime;
-        if (DeltaTime >= FrameRate)
+        if (DeltaTime >= FrameDeltaTime)
         {
-            DeltaTime -= FrameRate;
+            DeltaTime -= FrameDeltaTime;
             Graphics.Blit(CurGenerationRT, NextGenerationRT, GOLComputingMat);
             Graphics.Blit(NextGenerationRT, CurGenerationRT);
         }

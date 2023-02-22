@@ -366,7 +366,6 @@ MonoBehaviour:
   GOLComputingMat: {fileID: 2100000, guid: c5585e53347a3a843ba4f0b22efcd953, type: 2}
   CurGenerationRT: {fileID: 8400000, guid: d4c39d76a6585694a8ce01f533dc7aa3, type: 2}
   NextGenerationRT: {fileID: 8400000, guid: 417ce2d914ea4da4ea49540c7314e361, type: 2}
-  FrameRate: 1
   IsPause: 0
 --- !u!65 &581142407
 BoxCollider:
@@ -476,3 +475,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameofLifeController: {fileID: 581142406}
+  zoomSensitivity: 2
+  MinCamSize: 2
+  MaxCamSize: 150

@@ -3,6 +3,7 @@ Shader "Custom/CurGenerationShader"
     Properties
     {
         _MainTex("Cur Generation Texture", 2D) = "white" {}
+        _BGColor("Background Color", Color) = (0,0,0,0)
         _CellColor("Cell Color", Color) = (0,0,0,0)
         _GridColor("Grid Color", Color) = (0,0,0,0)
         
@@ -42,6 +43,7 @@ Shader "Custom/CurGenerationShader"
 
             sampler2D _MainTex;
             float4 _MainTex_TexelSize;
+            fixed4 _BGColor;
             fixed4 _CellColor;
             fixed4 _GridColor;
 
@@ -55,7 +57,10 @@ Shader "Custom/CurGenerationShader"
                 }
                 
                 fixed4 col = tex2D(_MainTex, i.uv);
-                return col.r * _CellColor;
+                if (col.r > 0)
+                    return _CellColor;
+                else
+                    return _BGColor;
             }
             ENDCG
         }

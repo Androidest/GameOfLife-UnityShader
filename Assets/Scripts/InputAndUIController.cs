@@ -8,6 +8,10 @@ using UnityEngine.UIElements;
 public class InputAndUIController : MonoBehaviour
 {
     [SerializeField] GameofLifeController GameofLifeController;
+    [SerializeField] private float zoomSensitivity = 2f;
+    [SerializeField] private float MinCamSize = 1;
+    [SerializeField] private float MaxCamSize = 100;
+
     private Camera MainCamera;
     private UIDocument Doc;
     private Button RestartBtn;
@@ -18,6 +22,9 @@ public class InputAndUIController : MonoBehaviour
     private bool IsLeftDown;
     private int LastX;
     private int LastY;
+    private bool IsRightDown;
+    private Vector3 DragPos;
+    
 
     void Awake()
     {
@@ -40,10 +47,12 @@ public class InputAndUIController : MonoBehaviour
     {
         onClickPause();
         GenSpeedSlider.value = 0.5f;
+        GameofLifeController.PlaySpeed = GenSpeedSlider.value;
         LastX = -1;
         LastY = -1;
     }
 
+    // UI events
     private void onClickPause()
     {
         PlayPauseGroup.Clear();
@@ -70,9 +79,10 @@ public class InputAndUIController : MonoBehaviour
         GameofLifeController.PlaySpeed = evt.newValue;
     }
 
-    // Update is called once per frame
+    // Input
     void Update()
     {
+        // Left click: To draw or erase cell
         if (IsLeftDown)
         {
             if (Input.GetMouseButtonUp(0))
@@ -98,6 +108,46 @@ public class InputAndUIController : MonoBehaviour
         else if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             IsLeftDown = true;
+        }
+
+        // Right Click: to drag and move the camera
+        if (IsRightDown)
+        {
+            if (Input.GetMouseButtonUp(1))
+            {
+                IsRightDown = false;
+            }
+            else
+            {
+                Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hitInfo;
+
+                if (Physics.Raycast(ray, out hitInfo))
+                {
+                    var delta = DragPos - hitInfo.point;
+                    Camera.main.transform.position += delta;
+                }
+            }
+        }
+        else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            Debug.Log("123");
+            Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hitInfo;
+
+            if (Physics.Raycast(ray, out hitInfo))
+            {
+                DragPos = hitInfo.point;
+            }
+            IsRightDown = true;
+        }
+
+        // Scroll: To zoom
+        float scroll = Input.mouseScrollDelta.y;
+        if (scroll != 0)
+        {
+            var newSize = Camera.main.orthographicSize - scroll * zoomSensitivity;
+            Camera.main.orthographicSize = Mathf.Clamp(newSize, MinCamSize, MaxCamSize);
         }
     }
 }
